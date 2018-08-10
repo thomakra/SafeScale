@@ -73,22 +73,6 @@ type AuthOptions struct {
 	Region string
 	//Project Name
 	ProjectName string
-	//OstUsername
-	OstUsername string
-	//OstPassword
-	OstPassword string
-	//OstDomainName
-	OstDomainName string
-	//OstProjectID
-	OstProjectID string
-	//OstAuth
-	OstAuth string
-	//OstRegion
-	OstRegion string
-	//OstSecretKey
-	OstSecretKey string
-	//OstTypes
-	OstTypes string
 }
 
 // func parseOpenRC(openrc string) (*openstack.AuthOptions, error) {
@@ -111,16 +95,6 @@ func AuthenticatedClient(opts AuthOptions) (*Client, error) {
 		TenantID:   opts.ApplicationKey,
 		TenantName: opts.ProjectName,
 		Region:     opts.Region,
-		/*
-			OstUsername:   opts.OstUsername,
-			OstPassword:   opts.OstPassword,
-			OstDomainName: opts.OstDomainName,
-			OstProjectID:  opts.OstProjectID,
-			OstAuth:       opts.OstAuth,
-			OstRegion:     opts.OstRegion,
-			OstSecretKey:  opts.OstSecretKey,
-			OstTypes:      opts.OstTypes,
-		*/
 	},
 		openstack.CfgOptions{
 			ProviderNetwork:           ProviderNetwork,
@@ -159,32 +133,12 @@ func (c *Client) Build(params map[string]interface{}) (api.ClientAPI, error) {
 	OpenstackPassword, _ := params["OpenstackPassword"].(string)
 	Region, _ := params["Region"].(string)
 	ProjectName, _ := params["ProjectName"].(string)
-	/*
-		OstUsername, _ := params["OstUsername"].(string)
-		OstPassword, _ := params["OstPassword"].(string)
-		OstDomainName, _ := params["OstDomainName"].(string)
-		OstProjectID, _ := params["OstProjectID"].(string)
-		OstAuth, _ := params["OstAuth"].(string)
-		OstRegion, _ := params["OstRegion"].(string)
-		OstSecretKey, _ := params["OstSecretKey"].(string)
-		OstTypes, _ := params["OstTypes"].(string)
-	*/
 	return AuthenticatedClient(AuthOptions{
 		ApplicationKey:    ApplicationKey,
 		OpenstackID:       OpenstackID,
 		OpenstackPassword: OpenstackPassword,
 		Region:            Region,
 		ProjectName:       ProjectName,
-		/*
-			OstUsername:       OstUsername,
-			OstPassword:       OstPassword,
-			OstDomainName:     OstDomainName,
-			OstProjectID:      OstProjectID,
-			OstAuth:           OstAuth,
-			OstRegion:         OstRegion,
-			OstSecretKey:      OstSecretKey,
-			OstTypes:          OstTypes,
-		*/
 	})
 }
 

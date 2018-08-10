@@ -22,6 +22,7 @@ import (
 
 	"github.com/CS-SI/SafeScale/providers"
 	"github.com/CS-SI/SafeScale/providers/api"
+	"github.com/CS-SI/SafeScale/providers/object"
 )
 
 //ContainerAPI defines API to manipulate containers
@@ -41,6 +42,13 @@ func NewContainerService(api api.ClientAPI) ContainerAPI {
 	}
 }
 
+//NewContainerServiceObject creates a Container service
+func NewContainerServiceObject(location *object.Location) ContainerAPI {
+	return &ContainerService{
+		provider: providers.FromClientObject(location),
+	}
+}
+
 // ContainerService container service
 type ContainerService struct {
 	provider *providers.Service
@@ -48,21 +56,25 @@ type ContainerService struct {
 
 // List retrieves all available containers
 func (srv *ContainerService) List() ([]string, error) {
-	return srv.provider.ListContainers()
+	fmt.Println("ooooooo List")
+	fmt.Println("ooooooo List", srv.provider.Location)
+	return srv.provider.Location.ListContainers()
 }
 
 // Create a container
 func (srv *ContainerService) Create(name string) error {
-	container, _ := srv.provider.GetContainer(name)
-	if container != nil {
-		return providers.ResourceAlreadyExistsError("Container", name)
-	}
-	return srv.provider.CreateContainer(name)
+	fmt.Println("ooooooo Create ")
+	fmt.Println("ooooooo Create", srv.provider.Location)
+	/*	container, _ := srv.provider.GetContainer(name)
+		if container != nil {
+			return providers.ResourceAlreadyExistsError("Container", name)
+		}*/
+	return srv.provider.Location.Create(name)
 }
 
 // Delete a container
 func (srv *ContainerService) Delete(name string) error {
-	return srv.provider.DeleteContainer(name)
+	return srv.provider.Location.Remove(name)
 }
 
 // Inspect a container
@@ -79,7 +91,7 @@ func (srv *ContainerService) Mount(containerName, hostName, path string) error {
 	}
 
 	// Get Host ID
-	hostService := NewHostService(srv.provider)
+	hostService := NewHostService(srv.provider.ClientAPI)
 	host, err := hostService.Get(hostName)
 	if err != nil {
 		return fmt.Errorf("no host found with name or id '%s'", hostName)
@@ -140,7 +152,7 @@ func (srv *ContainerService) UMount(containerName, hostName string) error {
 	}
 
 	// Get Host ID
-	hostService := NewHostService(srv.provider)
+	hostService := NewHostService(srv.provider.ClientAPI)
 	host, err := hostService.Get(hostName)
 	if err != nil {
 		return fmt.Errorf("no host found with name or id '%s'", hostName)

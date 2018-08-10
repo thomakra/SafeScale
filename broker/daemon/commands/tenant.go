@@ -25,13 +25,15 @@ import (
 	_ "github.com/CS-SI/SafeScale/broker/utils" // Imported to initialise tenants
 	"github.com/CS-SI/SafeScale/providers"
 	"github.com/CS-SI/SafeScale/providers/api"
+	"github.com/CS-SI/SafeScale/providers/object"
 	google_protobuf "github.com/golang/protobuf/ptypes/empty"
 )
 
 //Tenant structure to handle name and clientAPI for a tenant
 type Tenant struct {
-	name   string
-	Client api.ClientAPI
+	name     string
+	Client   api.ClientAPI
+	Location *object.Location
 }
 
 var (
@@ -96,7 +98,7 @@ func getCurrentTenant() *Tenant {
 			if err != nil {
 				return nil
 			}
-			currentTenant = &Tenant{name: name, Client: service}
+			currentTenant = &Tenant{name: name, Client: service.ClientAPI, Location: service.Location}
 		}
 	}
 	return currentTenant
@@ -115,7 +117,7 @@ func (s *TenantServiceServer) Set(ctx context.Context, in *pb.TenantName) (*goog
 	if err != nil {
 		return nil, fmt.Errorf("Unable to set tenant '%s': %s", in.GetName(), err.Error())
 	}
-	currentTenant = &Tenant{name: in.GetName(), Client: clientAPI}
+	currentTenant = &Tenant{name: in.GetName(), Client: clientAPI.ClientAPI, Location: clientAPI.Location}
 	log.Printf("Current tenant is now '%s'", in.GetName())
 	return &google_protobuf.Empty{}, nil
 }

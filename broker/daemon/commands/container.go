@@ -46,7 +46,7 @@ func (s *ContainerServiceServer) List(ctx context.Context, in *google_protobuf.E
 		return nil, fmt.Errorf("No tenant set")
 	}
 
-	service := services.NewContainerService(currentTenant.Client)
+	service := services.NewContainerServiceObject(currentTenant.Location)
 	containers, err := service.List()
 	if err != nil {
 		return nil, err
@@ -63,7 +63,7 @@ func (s *ContainerServiceServer) Create(ctx context.Context, in *pb.Container) (
 		return nil, fmt.Errorf("No tenant set")
 	}
 
-	service := services.NewContainerService(currentTenant.Client)
+	service := services.NewContainerServiceObject(currentTenant.Location)
 	err := service.Create(in.GetName())
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (s *ContainerServiceServer) Delete(ctx context.Context, in *pb.Container) (
 		return nil, fmt.Errorf("No tenant set")
 	}
 
-	service := services.NewContainerService(currentTenant.Client)
+	service := services.NewContainerServiceObject(currentTenant.Location)
 	err := service.Delete(in.GetName())
 	if err != nil {
 		return nil, err

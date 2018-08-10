@@ -21,6 +21,7 @@ import (
 	"log"
 
 	"github.com/CS-SI/SafeScale/providers/api"
+	"github.com/CS-SI/SafeScale/providers/object"
 	"github.com/spf13/viper"
 )
 
@@ -58,18 +59,29 @@ func GetService(tenantName string) (*Service, error) {
 	clientProvider := "__not_found__"
 	for _, t := range tenants {
 		tenant, _ := t.(map[string]interface{})
-		if name, ok := tenant["name"].(string); ok {
+		tenantconfig, _ := tenant["config"].(map[string]interface{})
+		tenantobject, _ := tenant["object"].(map[string]interface{})
+		// Merge tenantconfig and tenantobject
+		for k, v := range tenantconfig {
+			tenantobject[k] = v
+		}
+		tenantmerged := tenantobject
+		if name, ok := tenantconfig["name"].(string); ok {
 			if name == tenantName {
 				tenantInCfg = true
-				if provider, ok := tenant["client"].(string); ok {
+				if provider, ok := tenantmerged["client"].(string); ok {
 					clientProvider = provider
 					if client, ok := providers[provider]; ok {
-						service, err := client.Build(tenant)
+						location := new(object.Location)
+						Config := setConfig(tenantobject)
+						err = location.Connect(Config)
+						service, err := client.Build(tenantmerged)
 						if err != nil {
 							return nil, fmt.Errorf("Error creating tenant %s on provider %s: %s", tenantName, provider, err.Error())
 						}
 						return &Service{
 							ClientAPI: service,
+							Location:  location,
 						}, nil
 					}
 				}
@@ -83,6 +95,23 @@ func GetService(tenantName string) (*Service, error) {
 	return nil, ResourceNotFoundError("Client builder", clientProvider)
 }
 
+func setConfig(tenant map[string]interface{}) object.Config {
+
+	var Config object.Config
+	Config.Domain = "default"
+	Config.Auth = tenant["OstAuth"].(string)
+	Config.Endpoint = tenant["OstAuth"].(string)
+	Config.User = tenant["OstUsername"].(string)
+	Config.Tenant = tenant["OstProjectID"].(string)
+	Config.Region = tenant["OstRegion"].(string)
+	if tenant["OstSecretKey"] != nil {
+		Config.Secretkey = tenant["OstSecretKey"].(string)
+	}
+	Config.Key = tenant["OstPassword"].(string)
+	Config.Types = tenant["OstTypes"].(string)
+	return Config
+}
+
 func loadConfig() error {
 	tenantsCfg, err := getTenantsFromCfg()
 	if err != nil {
@@ -90,8 +119,9 @@ func loadConfig() error {
 	}
 	for _, t := range tenantsCfg {
 		tenant, _ := t.(map[string]interface{})
-		if name, ok := tenant["name"].(string); ok {
-			if provider, ok := tenant["client"].(string); ok {
+		tenantconfig, _ := tenant["config"].(map[string]interface{})
+		if name, ok := tenantconfig["name"].(string); ok {
+			if provider, ok := tenantconfig["client"].(string); ok {
 				tenants[name] = provider
 			} else {
 				return fmt.Errorf("Invalid configuration file '%s'. Tenant '%s' has no client type", v.ConfigFileUsed(), name)

@@ -122,7 +122,7 @@ func (srv *VolumeService) Attach(volumename, hostName, path, format string) erro
 	}
 
 	// Get Host ID
-	hostService := NewHostService(srv.provider)
+	hostService := NewHostService(srv.provider.ClientAPI)
 	host, err := hostService.Get(hostName)
 	if err != nil {
 		return fmt.Errorf("no host found with name or id '%s'", hostName)
@@ -180,7 +180,7 @@ func (srv *VolumeService) Detach(volumename string, hostName string) error {
 	}
 
 	// Get Host ID
-	hostService := NewHostService(srv.provider)
+	hostService := NewHostService(srv.provider.ClientAPI)
 	host, err := hostService.Get(hostName)
 	if err != nil {
 		return fmt.Errorf("no host found with name or id '%s'", hostName)

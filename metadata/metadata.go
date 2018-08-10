@@ -25,6 +25,7 @@ import (
 
 	"github.com/CS-SI/SafeScale/providers"
 	"github.com/CS-SI/SafeScale/providers/api"
+	"github.com/CS-SI/SafeScale/providers/object"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 )
@@ -36,17 +37,28 @@ const (
 
 var containerName string
 
+/*
 // InitializeContainer creates the Object Storage Container/Bucket that will store the metadata
-func InitializeContainer(client api.ClientAPI) error {
-	svc := providers.FromClient(client)
+func InitializeContainer(client *object.Location) error {
+	svc := providers.FromClientObject(client)
 	err := svc.CreateContainer(containerName)
 	if err != nil {
 		fmt.Printf("failed to create Object Container %s: %s\n", containerName, err.Error())
 	}
 	return err
 }
+*/
 
-// Folder describes a metadata folder
+//InitContainer InitContainer creates the Object Storage Container/Bucket that will store the metadata
+func InitContainer(Location object.Location) error {
+	err := Location.Create(containerName)
+	if err != nil {
+		fmt.Printf("failed to create Object Container %s: %s\n", containerName, err.Error())
+	}
+	return err
+}
+
+//Folder describes a metadata folder
 type Folder struct {
 	//path contains the base path where to read/write record in Object Storage
 	path string

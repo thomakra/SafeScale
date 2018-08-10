@@ -288,7 +288,20 @@ func (client *Client) DeleteVolumeAttachment(serverID, id string) error {
 	return nil
 }
 
-// CreateContainer creates an object container
+//CreateContainer creates an object container
+func (client *Client) CreateContainer(name string) error {
+
+	err := client.LocforStore.Create(name)
+	if err != nil {
+		return fmt.Errorf("Error creating container %s: %s", name, errorString(err))
+	}
+
+	return nil
+}
+
+/*
+//
+//CreateContainer creates an object container
 func (client *Client) CreateContainer(name string) error {
 	opts := containers.CreateOpts{
 		//		Metadata: meta,
@@ -300,13 +313,15 @@ func (client *Client) CreateContainer(name string) error {
 
 	return nil
 }
-
-// DeleteContainer deletes an object container
+*/
+//DeleteContainer deletes an object container
 func (client *Client) DeleteContainer(name string) error {
-	_, err := containers.Delete(client.Container, name).Extract()
+	//*** modif PC
+	err := client.LocforStore.Remove(name)
 	if err != nil {
 		return fmt.Errorf("Error deleting container %s: %s", name, errorString(err))
 	}
+
 	return err
 }
 
@@ -350,24 +365,10 @@ func (client *Client) GetContainer(name string) (*api.ContainerInfo, error) {
 
 // ListContainers list object containers
 func (client *Client) ListContainers() ([]string, error) {
-	opts := &containers.ListOpts{Full: true}
-
-	pager := containers.List(client.Container, opts)
-
-	var containerList []string
-	err := pager.EachPage(func(page pagination.Page) (bool, error) {
-
-		// Get a slice of strings, i.e. container names
-		containerNames, err := containers.ExtractNames(page)
-		if err != nil {
-			return false, err
-		}
-		for _, n := range containerNames {
-			containerList = append(containerList, n)
-		}
-
-		return true, nil
-	})
+	//*** modif PC
+	fmt.Println("appel ListContainers de stow ")
+	fmt.Println("ListContainers client.LocforStore.TenantName", client.LocforStore.TenantName)
+	containerList, err := client.LocforStore.ListContainers()
 	if err != nil {
 		return nil, fmt.Errorf("Error listing containers: %s", errorString(err))
 	}

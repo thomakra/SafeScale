@@ -26,6 +26,7 @@ import (
 	"github.com/CS-SI/SafeScale/providers/api"
 	"github.com/CS-SI/SafeScale/providers/api/HostState"
 	"github.com/CS-SI/SafeScale/providers/api/VolumeState"
+	"github.com/CS-SI/SafeScale/providers/object"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -75,12 +76,20 @@ func (e ResourceAlreadyExists) Error() string {
 // Service Client High level service
 type Service struct {
 	api.ClientAPI
+	*object.Location
 }
 
 // FromClient contructs a Service instance from a ClientAPI
 func FromClient(clt api.ClientAPI) *Service {
 	return &Service{
 		ClientAPI: clt,
+	}
+}
+
+// FromClient contructs a Service instance from a ClientAPI
+func FromClientObject(clt *object.Location) *Service {
+	return &Service{
+		Location: clt,
 	}
 }
 
@@ -253,7 +262,7 @@ func (srv *Service) WaitVolumeState(volumeID string, state VolumeState.Enum, tim
 	next := make(chan bool)
 	vc := make(chan *api.Volume)
 
-	go pollVolume(srv, volumeID, state, cout, next, vc)
+	go pollVolume(srv.ClientAPI, volumeID, state, cout, next, vc)
 	for {
 		select {
 		case res := <-cout:

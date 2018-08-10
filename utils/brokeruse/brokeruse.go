@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	pb "github.com/CS-SI/SafeScale/broker"
@@ -160,8 +159,9 @@ func SSHRun(id string, command string, timeout time.Duration) error {
 	if err != nil {
 		return fmt.Errorf("Could not execute ssh command: %v", err)
 	}
-	fmt.Print(fmt.Sprintf(resp.GetOutput()))
-	fmt.Fprint(os.Stderr, fmt.Sprintf(resp.GetErr()))
+	fmt.Println(resp)
+	//fmt.Print(fmt.Sprintf(resp.GetOutput()))
+	//fmt.Fprint(os.Stderr, fmt.Sprintf(resp.GetErr()))
 	// fmt.Println(fmt.Sprintf(string(resp.GetStatus())))
 
 	return nil

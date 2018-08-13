@@ -257,7 +257,7 @@ func (client *Client) UpdateContainer(name string, meta map[string]string) error
 
 //GetContainerMetadata get an object container metadata
 func (client *Client) GetContainerMetadata(name string) (map[string]string, error) {
-	meta, err := containers.Get(client.Container, name).ExtractMetadata()
+	meta, err := containers.Get(client.Container, name, nil).ExtractMetadata()
 	if err != nil {
 		return nil, fmt.Errorf("Error getting container %s: %s", name, errorString(err))
 	}
@@ -267,7 +267,7 @@ func (client *Client) GetContainerMetadata(name string) (map[string]string, erro
 
 //GetContainer get container info
 func (client *Client) GetContainer(name string) (*api.ContainerInfo, error) {
-	meta, err := containers.Get(client.Container, name).ExtractMetadata()
+	meta, err := containers.Get(client.Container, name, nil).ExtractMetadata()
 	_ = meta
 
 	if err != nil {

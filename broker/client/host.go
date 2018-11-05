@@ -117,6 +117,7 @@ func (h *host) Stop(name string, timeout time.Duration) (interface{}, error) {
 
 // Create ...
 func (h *host) Create(def pb.HostDefinition, timeout time.Duration) (*pb.Host, error) {
+	// TODO Add a creation flag here
 	conn := utils.GetConnection(int(h.session.brokerdPort))
 	defer conn.Close()
 	if timeout < utils.TimeoutCtxHost {

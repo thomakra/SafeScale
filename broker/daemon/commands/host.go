@@ -151,9 +151,6 @@ func (s *HostServiceServer) Create(ctx context.Context, in *pb.HostDefinition) (
 	}
 
 	hostService := services.NewHostService(currentTenant.Client)
-	
-	// TODO https://github.com/CS-SI/SafeScale/issues/30
-	// TODO GITHUB If we have to ask for GPU requirements and FREQ requirements, pb.HostDefinition has to change and the invocation of hostService.Create too...
 
 	db, err := scribble.New(safeutils.AbsPathify("$HOME/.safescale/scanner/db"), nil)
 	if err != nil {
@@ -166,8 +163,8 @@ func (s *HostServiceServer) Create(ctx context.Context, in *pb.HostDefinition) (
 	}
 
 	if in.GetGPUNumber() > 0 && in.GetFreq() != 0 {
-		if len(image_list) == 0 {
-			noScannerDb := fmt.Sprintf("No scanner database available !")
+		if !in.Force && (len(image_list) == 0) {
+			noScannerDb := fmt.Sprintf("No scanner database available !. Run scanner to create one.")
 			log.Error(noScannerDb)
 			return nil, errors.New(noScannerDb)
 		}
@@ -180,7 +177,6 @@ func (s *HostServiceServer) Create(ctx context.Context, in *pb.HostDefinition) (
 			fmt.Println("Error", err)
 		}
 
-		// TODO GITHUB Here goes the filtering
 		if imageFound.GPU < int(in.GetGPUNumber()) {
 			continue
 		}
@@ -192,14 +188,15 @@ func (s *HostServiceServer) Create(ctx context.Context, in *pb.HostDefinition) (
 		images = append(images, imageFound)
 	}
 
-	if len(images) == 0 {
-		noHostError := fmt.Sprintf("Unable to create a host with '%d' GPUs and '%f' clock frequency !", in.GetGPUNumber(), in.GetFreq())
+	if !in.Force && (len(images) == 0) {
+		noHostError := fmt.Sprintf("Unable to create a host with '%d' GPUs and '%f' GHz clock frequency !", in.GetGPUNumber(), in.GetFreq())
 		log.Error(noHostError)
 		return nil, errors.New(noHostError)
 	}
 
+	// TODO https://github.com/CS-SI/SafeScale/issues/30
+	// TODO GITHUB If we have to ask for GPU requirements and FREQ requirements, pb.HostDefinition has to change and the invocation of hostService.Create too...
 
-	// TODO Change create signature
 	host, err := hostService.Create(in.GetName(), in.GetNetwork(),
 		int(in.GetCPUNumber()), in.GetRAM(), int(in.GetDisk()), in.GetImageID(), in.GetPublic())
 

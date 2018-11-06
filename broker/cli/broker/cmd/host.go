@@ -237,6 +237,7 @@ var hostCreate = cli.Command{
 			RAM:       float32(c.Float64("ram")),
 			GPUNumber: int32(c.Int("gpu")),
 			Freq:      float32(c.Float64("cpu-freq")),
+			Force:    c.Bool("force"),
 		}
 		resp, err := client.New(c.GlobalInt("port")).Host.Create(def, client.DefaultExecutionTimeout)
 		if err != nil {
